@@ -1,6 +1,4 @@
-data_hazard_results:
-
-./trace_generator data_hazard_test
+CLI: ./trace_generator data_hazard_test
 
 How many instructions do you want to generate: 8
 
@@ -21,7 +19,9 @@ Enter the 6 fields for instruction 6 [(PC) (itype R|L|S|B) (sReg_a) (sReg_b) (dR
 Enter the 6 fields for instruction 7 [(PC) (itype R|L|S|B) (sReg_a) (sReg_b) (dReg) (addr)]:
 28 B 6 7 8 128
 
+***************************************************************************************************
 
+DATA HAZARD RESULTS:
 [cycle 1] LOAD: (PC: 0)(sReg_a: 1)(dReg: 3)(addr: 100)
 [cycle 2] RTYPE: (PC: 4)(sReg_a: 1)(sReg_b: 3)(dReg: 4)
 [cycle 3] LOAD: (PC: 8)(sReg_a: 2)(dReg: 4)(addr: 108)
@@ -31,3 +31,34 @@ Enter the 6 fields for instruction 7 [(PC) (itype R|L|S|B) (sReg_a) (sReg_b) (dR
 [cycle 7] LOAD: (PC: 24)(sReg_a: 5)(dReg: 7)(addr: 124)
 [cycle 8] BRANCH: (PC: 28)(sReg_a: 6)(sReg_b: 7)(addr: 128)
 + Simulation terminates at cycle : 8
+
+***************************************************************************************************
+CLI: ./five_stage_original data_hazard_test 1
+
+ ** opening file data_hazard_test
+[cycle 5] LOAD: (PC: 0)(sReg_a: 1)(dReg: 3)(addr: 100)
+[cycle 6] RTYPE: (PC: 4)(sReg_a: 1)(sReg_b: 3)(dReg: 4)
+[cycle 7] LOAD: (PC: 8)(sReg_a: 2)(dReg: 4)(addr: 108)
+[cycle 8] RTYPE: (PC: 12)(sReg_a: 7)(sReg_b: 8)(dReg: 9)
+[cycle 9] LOAD: (PC: 16)(sReg_a: 3)(dReg: 5)(addr: 116)
+[cycle 10] STORE: (PC: 20)(sReg_a: 4)(sReg_b: 5)(addr: 120)
+[cycle 11] LOAD: (PC: 24)(sReg_a: 5)(dReg: 7)(addr: 124)
+[cycle 12] BRANCH: (PC: 28)(sReg_a: 6)(sReg_b: 7)(addr: 128)
++ Simulation terminates at cycle : 12
+
+***************************************************************************************************
+CLI: ./five_stage data_hazard_test 1
+
+ ** opening file data_hazard_test
+[cycle 5] LOAD: (PC: 0)(sReg_a: 1)(dReg: 3)(addr: 100)
+[cycle 6] NOP:
+[cycle 7] RTYPE: (PC: 4)(sReg_a: 1)(sReg_b: 3)(dReg: 4)
+[cycle 8] LOAD: (PC: 8)(sReg_a: 2)(dReg: 4)(addr: 108)
+[cycle 9] RTYPE: (PC: 12)(sReg_a: 7)(sReg_b: 8)(dReg: 9)
+[cycle 10] LOAD: (PC: 16)(sReg_a: 3)(dReg: 5)(addr: 116)
+[cycle 11] NOP:
+[cycle 12] STORE: (PC: 20)(sReg_a: 4)(sReg_b: 5)(addr: 120)
+[cycle 13] LOAD: (PC: 24)(sReg_a: 5)(dReg: 7)(addr: 124)
+[cycle 14] NOP:
+[cycle 15] BRANCH: (PC: 28)(sReg_a: 6)(sReg_b: 7)(addr: 128)
++ Simulation terminates at cycle : 15
