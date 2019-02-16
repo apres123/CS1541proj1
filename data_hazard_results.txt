@@ -1,0 +1,33 @@
+data_hazard_results:
+
+./trace_generator data_hazard_test
+
+How many instructions do you want to generate: 8
+
+Enter the 6 fields for instruction 0 [(PC) (itype R|L|S|B) (sReg_a) (sReg_b) (dReg) (addr)]:
+0 L 1 2 3 100
+Enter the 6 fields for instruction 1 [(PC) (itype R|L|S|B) (sReg_a) (sReg_b) (dReg) (addr)]:
+4 R 1 3 4 104
+Enter the 6 fields for instruction 2 [(PC) (itype R|L|S|B) (sReg_a) (sReg_b) (dReg) (addr)]:
+8 L 2 3 4 108
+Enter the 6 fields for instruction 3 [(PC) (itype R|L|S|B) (sReg_a) (sReg_b) (dReg) (addr)]:
+12 R 7 8 9 112
+Enter the 6 fields for instruction 4 [(PC) (itype R|L|S|B) (sReg_a) (sReg_b) (dReg) (addr)]:
+16 L 3 4 5 116
+Enter the 6 fields for instruction 5 [(PC) (itype R|L|S|B) (sReg_a) (sReg_b) (dReg) (addr)]:
+20 S 4 5 6 120
+Enter the 6 fields for instruction 6 [(PC) (itype R|L|S|B) (sReg_a) (sReg_b) (dReg) (addr)]:
+24 L 5 6 7 124
+Enter the 6 fields for instruction 7 [(PC) (itype R|L|S|B) (sReg_a) (sReg_b) (dReg) (addr)]:
+28 B 6 7 8 128
+
+
+[cycle 1] LOAD: (PC: 0)(sReg_a: 1)(dReg: 3)(addr: 100)
+[cycle 2] RTYPE: (PC: 4)(sReg_a: 1)(sReg_b: 3)(dReg: 4)
+[cycle 3] LOAD: (PC: 8)(sReg_a: 2)(dReg: 4)(addr: 108)
+[cycle 4] RTYPE: (PC: 12)(sReg_a: 7)(sReg_b: 8)(dReg: 9)
+[cycle 5] LOAD: (PC: 16)(sReg_a: 3)(dReg: 5)(addr: 116)
+[cycle 6] STORE: (PC: 20)(sReg_a: 4)(sReg_b: 5)(addr: 120)
+[cycle 7] LOAD: (PC: 24)(sReg_a: 5)(dReg: 7)(addr: 124)
+[cycle 8] BRANCH: (PC: 28)(sReg_a: 6)(sReg_b: 7)(addr: 128)
++ Simulation terminates at cycle : 8
