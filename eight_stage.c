@@ -11,6 +11,8 @@
 #include <arpa/inet.h>
 #include "CPU.h" 
 
+void print_MEM2_WB(struct instruction MEM2_WB, int cycle_number);
+
 int main(int argc, char **argv)
 {
   struct instruction *tr_entry;
@@ -60,7 +62,55 @@ int main(int argc, char **argv)
       ID_EX1 = IF2_ID;
       IF2_ID = IF1_IF2;
       IF1_IF2 = PCregister;
-
+      
+      /*DATA HAZARD
+        1. EX1_EX2 write into register, and ID_EX1 reads from that register. insert no-op into EX1_EX2.
+        2. EX2_MEM1 or MEM1_MEM2 is LOAD into register, and ID_EX1 reads from that register. insert no-op into EX1_EX2.
+      */
+      
+      //1st hazard
+      if ((EX1_EX2.dReg == ID_EX1.sReg_a) || (EX1_EX2.dReg == ID_EX1.sReg_b)) {
+        //print out wb
+        if (trace_view_on && cycle_number>=8) {
+          print_MEM2_WB(MEM2_WB, cycle_number);
+        }
+        //move up and change ex1ex2 to no op
+        MEM2_WB = MEM1_MEM2;
+        MEM1_MEM2 = EX2_MEM1;
+        EX2_MEM1 = EX1_EX2;
+        EX1_EX2.type = ti_NOP;
+        cycle_number++;
+      }
+      
+      //second hazard
+      if (EX2_MEM1.type = ti_LOAD) {
+        if ((EX2_MEM1.dReg == ID_EX1.sReg_a) || (EX2_MEM1.dReg == ID_EX1.sReg_b)) {
+          if (trace_view_on && cycle_number>=8) {
+            print_MEM2_WB(MEM2_WB, cycle_number);
+          }
+          //move up and change ex1ex2 to no op
+          MEM2_WB = MEM1_MEM2;
+          MEM1_MEM2 = EX2_MEM1;
+          EX2_MEM1 = EX1_EX2;
+          EX1_EX2.type = ti_NOP;
+          cycle_number++;
+        }
+      }
+      
+      if (MEM1_MEM2.type = ti_LOAD) {
+        if ((MEM1_MEM2.dReg == ID_EX1.sReg_a) || (MEM1_MEM2.dReg == ID_EX1.sReg_b)) {
+          if (trace_view_on && cycle_number>=8) {
+            print_MEM2_WB(MEM2_WB, cycle_number);
+          }
+          //move up and change ex1ex2 to no op
+          MEM2_WB = MEM1_MEM2;
+          MEM1_MEM2 = EX2_MEM1;
+          EX2_MEM1 = EX1_EX2;
+          EX1_EX2.type = ti_NOP;
+          cycle_number++;
+        }
+      }
+      
       if(!size){    /* if no more instructions in trace, reduce flush_counter */
         flush_counter--;   
       }
@@ -76,6 +126,9 @@ int main(int argc, char **argv)
       switch(MEM2_WB.type) {
         case ti_NOP:
           printf("[cycle %d] NOP:\n",cycle_number) ;
+          break;
+        case ti_FLUSHED:
+          printf("[cycle %d] FLUSHED:\n", cycle_number) ;
           break;
         case ti_RTYPE: /* registers are translated for printing by subtracting offset  */
           printf("[cycle %d] RTYPE:",cycle_number) ;
@@ -112,8 +165,54 @@ int main(int argc, char **argv)
     }
   }
 
-  trace_uninit();
-
+  trace_uninit();  
+  
   exit(0);
 }
 
+  /*When doing data hazards, I have to print an extra time
+    so im making this function instead of copy-pasting the print stuff twice lol
+    if you guys think of a better way lmk
+  */
+void print_MEM2_WB(struct instruction MEM2_WB, int cycle_number) {
+  switch(MEM2_WB.type) {
+      case ti_NOP:
+        printf("[cycle %d] NOP:\n",cycle_number) ;
+        break;
+      case ti_FLUSHED:
+        printf("[cycle %d] FLUSHED:\n", cycle_number) ;
+        break;
+      case ti_RTYPE: /* registers are translated for printing by subtracting offset  */
+        printf("[cycle %d] RTYPE:",cycle_number) ;
+    printf(" (PC: %d)(sReg_a: %d)(sReg_b: %d)(dReg: %d) \n", MEM2_WB.PC, MEM2_WB.sReg_a, MEM2_WB.sReg_b, MEM2_WB.dReg);
+        break;
+      case ti_ITYPE:
+        printf("[cycle %d] ITYPE:",cycle_number) ;
+    printf(" (PC: %d)(sReg_a: %d)(dReg: %d)(addr: %d)\n", MEM2_WB.PC, MEM2_WB.sReg_a, MEM2_WB.dReg, MEM2_WB.Addr);
+        break;
+      case ti_LOAD:
+        printf("[cycle %d] LOAD:",cycle_number) ;      
+    printf(" (PC: %d)(sReg_a: %d)(dReg: %d)(addr: %d)\n", MEM2_WB.PC, MEM2_WB.sReg_a, MEM2_WB.dReg, MEM2_WB.Addr);
+        break;
+      case ti_STORE:
+        printf("[cycle %d] STORE:",cycle_number) ;      
+    printf(" (PC: %d)(sReg_a: %d)(sReg_b: %d)(addr: %d)\n", MEM2_WB.PC, MEM2_WB.sReg_a, MEM2_WB.sReg_b, MEM2_WB.Addr);
+        break;
+      case ti_BRANCH:
+        printf("[cycle %d] BRANCH:",cycle_number) ;
+    printf(" (PC: %d)(sReg_a: %d)(sReg_b: %d)(addr: %d)\n", MEM2_WB.PC, MEM2_WB.sReg_a, MEM2_WB.sReg_b, MEM2_WB.Addr);
+        break;
+      case ti_JTYPE:
+        printf("[cycle %d] JTYPE:",cycle_number) ;
+    printf(" (PC: %d)(addr: %d)\n", MEM2_WB.PC, MEM2_WB.Addr);
+        break;
+      case ti_SPECIAL:
+        printf("[cycle %d] SPECIAL:\n",cycle_number) ;      	
+        break;
+      case ti_JRTYPE:
+        printf("[cycle %d] JRTYPE:",cycle_number) ;
+    printf(" (PC: %d) (sReg_a: %d)(addr: %d)\n", MEM2_WB.PC, MEM2_WB.dReg, MEM2_WB.Addr);
+        break;
+        
+    }
+}
