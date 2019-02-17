@@ -54,4 +54,60 @@ prediction_method = 1
 + Simulation terminates at cycle : 3536689
 
 
+
 EIGHT STAGE SIMULATION
+sample.tr
+prediction_method = 0
+
+ ** opening file sample.tr
++ Simulation terminates at cycle : 3044
+
+
+prediction_method = 1
+
+ ** opening file sample.tr
++ Simulation terminates at cycle : 2995
+
+
+
+
+sample2.tr
+prediction_method = 0
+
+ ** opening file sample2.tr
++ Simulation terminates at cycle : 3131749
+
+
+prediction_method = 1
+
+ ** opening file sample2.tr
++ Simulation terminates at cycle : 3119549
+
+
+
+
+sample3.tr
+prediction_method = 0
+
+ ** opening file sample3.tr
++ Simulation terminates at cycle : 3369978
+
+
+prediction_method = 1
+
+ ** opening file sample3.tr
++ Simulation terminates at cycle : 3359019
+
+
+
+sample4.tr
+prediction_method = 0
+
+ ** opening file sample4.tr
++ Simulation terminates at cycle : 10015948
+
+
+prediction_method = 1
+
+ ** opening file sample4.tr
++ Simulation terminates at cycle : 9979557
