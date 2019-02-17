@@ -67,6 +67,37 @@ int main(int argc, char **argv)
       ID_EX1 = IF2_ID;
       IF2_ID = IF1_IF2;
       IF1_IF2 = PCregister;
+	  
+	  /*STRUCTURAL HAZARDS
+		if the instruction at WB is trying to
+		write into the register file while the instruction at ID is trying to read from the register file, priority is given
+		to the instruction at WB. The instructions at IF1, IF2 and ID are stalled for one cycle while the instruction
+		at WB is using the register file.*/
+		
+		if (MEM2_WB.type == ti_RTYPE	//if instruction at WB will write to register file
+			|| MEM2_WB.type == ti_ITYPE
+			|| MEM2_WB.type == ti_LOAD) {
+		
+			
+			if (IF2_ID.type != ti_SPECIAL	//if instruction at ID will read from register file
+				&& IF2_ID.type != ti_JTYPE
+				&& IF2_ID.type != ti_NOP
+				&& IF2_ID.type != ti_FLUSHED) {
+				
+				//print WB
+				trace(trace_view_on, cycle_number, MEM2_WB, 8);
+				
+				//stall IF1, IF2, and ID, creates bubble at EX
+				//printf("structural hazard encountered and handled\n");
+				
+				MEM2_WB = MEM1_MEM2;
+				MEM1_MEM2 = EX2_MEM1;
+				EX2_MEM1 = EX1_EX2;
+				EX1_EX2 = ID_EX1;
+				ID_EX1.type = ti_NOP;
+				cycle_number++;
+			}
+		}
       
       /*DATA HAZARD
         1. EX1_EX2 write into register, and ID_EX1 reads from that register. insert no-op into EX1_EX2.
