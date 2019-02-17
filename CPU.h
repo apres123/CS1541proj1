@@ -24,6 +24,13 @@ struct instruction {
 	unsigned int Addr;			// mem. address
 };
 
+//entries in branch prediction hash table
+struct branch_prediction {
+	bool prediction;//true if predicted to take branchPrediction
+	int PC;//PC of instruction
+	int target;//location jumped or branched to
+};
+
 #endif
 
 #define TRACE_BUFSIZE 1024*1024
