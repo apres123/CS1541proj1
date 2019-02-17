@@ -11,7 +11,8 @@ enum opcode {
 	ti_BRANCH,
 	ti_JTYPE,
 	ti_SPECIAL,
-	ti_JRTYPE
+	ti_JRTYPE,
+	ti_FLUSHED	/*added to 'flush' instruction in case of taken branch*/
 };
 
 struct instruction {

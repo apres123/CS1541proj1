@@ -73,6 +73,9 @@ int main(int argc, char **argv)
             case ti_NOP:
               printf("[cycle %d] NOP:\n",cycle_number) ;
               break;
+			case ti_FLUSHED:
+			  printf("[cycle %d] FLUSHED:\n",cycle_number) ;
+			  break;
             case ti_RTYPE: /* registers are translated for printing by subtracting offset  */
               printf("[cycle %d] RTYPE:",cycle_number) ;
           printf(" (PC: %d)(sReg_a: %d)(sReg_b: %d)(dReg: %d) \n", MEM_WB.PC, MEM_WB.sReg_a, MEM_WB.sReg_b, MEM_WB.dReg);
@@ -113,6 +116,70 @@ int main(int argc, char **argv)
           cycle_number++;
         }
       }
+	  /*IMPORTANT: to simulate a flushed instruction I added a new type field to the enum for instruction in CPU.h
+	    Make sure that if you're printing because of trace_view_on that the switch statement includes case ti_FLUSHED: */
+		
+	  /*assuming branch condition resolved in ID stage
+	  /*if instruction is branch*/
+	  if (ID_EX.type == ti_BRANCH) {
+		/*if the target address field is equal to PC of next instruction*/
+		if (ID_EX.Addr == IF_ID.PC) {
+			
+			if (trace_view_on && cycle_number>=5) {/* print the instruction exiting the pipeline if trace_view_on=1 */
+          switch(MEM_WB.type) {
+            case ti_NOP:
+              printf("[cycle %d] NOP:\n",cycle_number) ;
+              break;
+			case ti_FLUSHED:
+				printf("[cycle %d] FLUSHED:\n", cycle_number) ;
+				break;
+            case ti_RTYPE: /* registers are translated for printing by subtracting offset  */
+              printf("[cycle %d] RTYPE:",cycle_number) ;
+          printf(" (PC: %d)(sReg_a: %d)(sReg_b: %d)(dReg: %d) \n", MEM_WB.PC, MEM_WB.sReg_a, MEM_WB.sReg_b, MEM_WB.dReg);
+              break;
+            case ti_ITYPE:
+              printf("[cycle %d] ITYPE:",cycle_number) ;
+          printf(" (PC: %d)(sReg_a: %d)(dReg: %d)(addr: %d)\n", MEM_WB.PC, MEM_WB.sReg_a, MEM_WB.dReg, MEM_WB.Addr);
+              break;
+            case ti_LOAD:
+              printf("[cycle %d] LOAD:",cycle_number) ;      
+          printf(" (PC: %d)(sReg_a: %d)(dReg: %d)(addr: %d)\n", MEM_WB.PC, MEM_WB.sReg_a, MEM_WB.dReg, MEM_WB.Addr);
+              break;
+            case ti_STORE:
+              printf("[cycle %d] STORE:",cycle_number) ;      
+          printf(" (PC: %d)(sReg_a: %d)(sReg_b: %d)(addr: %d)\n", MEM_WB.PC, MEM_WB.sReg_a, MEM_WB.sReg_b, MEM_WB.Addr);
+              break;
+            case ti_BRANCH:
+              printf("[cycle %d] BRANCH:",cycle_number) ;
+          printf(" (PC: %d)(sReg_a: %d)(sReg_b: %d)(addr: %d)\n", MEM_WB.PC, MEM_WB.sReg_a, MEM_WB.sReg_b, MEM_WB.Addr);
+              break;
+            case ti_JTYPE:
+              printf("[cycle %d] JTYPE:",cycle_number) ;
+          printf(" (PC: %d)(addr: %d)\n", MEM_WB.PC, MEM_WB.Addr);
+              break;
+            case ti_SPECIAL:
+              printf("[cycle %d] SPECIAL:\n",cycle_number) ;      	
+              break;
+            case ti_JRTYPE:
+              printf("[cycle %d] JRTYPE:",cycle_number) ;
+          printf(" (PC: %d) (sReg_a: %d)(addr: %d)\n", MEM_WB.PC, MEM_WB.dReg, MEM_WB.Addr);
+              break;
+          }
+			/*flush incorrect instruction in IF_ID and advance others
+			
+			  Because of the way this program works - it doesn't actually take
+			  an incorrect instruction since it's just tracing a real execution.
+			  This being said: instead of 'flushing an incorrect instruction', I'm
+			  simulating it by advancing the branch and all instructions before it,
+			  then inserting a flushed instruction into the ID_EX buffer (where the
+			  branch was previously) */
+			MEM_WB = EX_MEM;
+			EX_MEM = ID_EX;
+			ID_EX.type = ti_FLUSHED;
+			cycle_number++;
+			}
+		}
+	  }
 
       if(!size){    /* if no more instructions in trace, reduce flush_counter */
         flush_counter--;   
@@ -130,6 +197,9 @@ int main(int argc, char **argv)
         case ti_NOP:
           printf("[cycle %d] NOP:\n",cycle_number) ;
           break;
+		case ti_FLUSHED:
+		  printf("[cycle %d] FLUSHED:\n",cycle_number) ;
+		  break;
         case ti_RTYPE: /* registers are translated for printing by subtracting offset  */
           printf("[cycle %d] RTYPE:",cycle_number) ;
 		  printf(" (PC: %d)(sReg_a: %d)(sReg_b: %d)(dReg: %d) \n", MEM_WB.PC, MEM_WB.sReg_a, MEM_WB.sReg_b, MEM_WB.dReg);
