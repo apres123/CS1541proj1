@@ -116,3 +116,49 @@ int write_trace(struct instruction item, char *fname)
 	return 1;
 }
 
+void trace(int trace_view_on, int cycle_number, struct instruction MEM_WB, int pipeline_num) {
+	
+	if (trace_view_on && cycle_number>=pipeline_num) {/* print the instruction exiting the pipeline if trace_view_on=1 */
+      switch(MEM_WB.type) {
+        case ti_NOP:
+          printf("[cycle %d] NOP:\n",cycle_number) ;
+          break;
+		case ti_FLUSHED:
+		  printf("[cycle %d] FLUSHED:\n",cycle_number) ;
+		  break;
+        case ti_RTYPE: /* registers are translated for printing by subtracting offset  */
+          printf("[cycle %d] RTYPE:",cycle_number) ;
+		  printf(" (PC: %d)(sReg_a: %d)(sReg_b: %d)(dReg: %d) \n", MEM_WB.PC, MEM_WB.sReg_a, MEM_WB.sReg_b, MEM_WB.dReg);
+          break;
+        case ti_ITYPE:
+          printf("[cycle %d] ITYPE:",cycle_number) ;
+		  printf(" (PC: %d)(sReg_a: %d)(dReg: %d)(addr: %d)\n", MEM_WB.PC, MEM_WB.sReg_a, MEM_WB.dReg, MEM_WB.Addr);
+          break;
+        case ti_LOAD:
+          printf("[cycle %d] LOAD:",cycle_number) ;      
+		  printf(" (PC: %d)(sReg_a: %d)(dReg: %d)(addr: %d)\n", MEM_WB.PC, MEM_WB.sReg_a, MEM_WB.dReg, MEM_WB.Addr);
+          break;
+        case ti_STORE:
+          printf("[cycle %d] STORE:",cycle_number) ;      
+		  printf(" (PC: %d)(sReg_a: %d)(sReg_b: %d)(addr: %d)\n", MEM_WB.PC, MEM_WB.sReg_a, MEM_WB.sReg_b, MEM_WB.Addr);
+          break;
+        case ti_BRANCH:
+          printf("[cycle %d] BRANCH:",cycle_number) ;
+		  printf(" (PC: %d)(sReg_a: %d)(sReg_b: %d)(addr: %d)\n", MEM_WB.PC, MEM_WB.sReg_a, MEM_WB.sReg_b, MEM_WB.Addr);
+          break;
+        case ti_JTYPE:
+          printf("[cycle %d] JTYPE:",cycle_number) ;
+		  printf(" (PC: %d)(addr: %d)\n", MEM_WB.PC, MEM_WB.Addr);
+          break;
+        case ti_SPECIAL:
+          printf("[cycle %d] SPECIAL:\n",cycle_number) ;      	
+          break;
+        case ti_JRTYPE:
+          printf("[cycle %d] JRTYPE:",cycle_number) ;
+		  printf(" (PC: %d) (sReg_a: %d)(addr: %d)\n", MEM_WB.PC, MEM_WB.dReg, MEM_WB.Addr);
+          break;
+      }
+    }
+	
+}
+

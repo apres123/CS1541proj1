@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include<stdlib.h>
+#include <stdbool.h>
 #include <inttypes.h>
 #include <arpa/inet.h>
 #include "CPU.h" 
@@ -20,6 +21,8 @@ int main(int argc, char **argv)
   size_t size;
   char *trace_file_name;
   int trace_view_on = 0;
+  int prediction_method = 0;
+  struct branch_prediction prediction_table[64];
   int flush_counter = 7; //8 stage pipeline, so we have to execute 7 instructions once trace is done
   
   unsigned int cycle_number = 0;
@@ -31,7 +34,9 @@ int main(int argc, char **argv)
   }
     
   trace_file_name = argv[1];
-  if (argc == 3) trace_view_on = atoi(argv[2]) ;
+  if (argc >= 3) trace_view_on = atoi(argv[2]) ;
+  
+  if (argc == 4) prediction_method = atoi(argv[3]) ;
 
   fprintf(stdout, "\n ** opening file %s\n", trace_file_name);
 
@@ -71,9 +76,7 @@ int main(int argc, char **argv)
       //1st hazard
       if ((EX1_EX2.dReg == ID_EX1.sReg_a) || (EX1_EX2.dReg == ID_EX1.sReg_b)) {
         //print out wb
-        if (trace_view_on && cycle_number>=8) {
-          print_MEM2_WB(MEM2_WB, cycle_number);
-        }
+        trace(trace_view_on, cycle_number, MEM2_WB, 8);
         //move up and change ex1ex2 to no op
         MEM2_WB = MEM1_MEM2;
         MEM1_MEM2 = EX2_MEM1;
@@ -85,9 +88,7 @@ int main(int argc, char **argv)
       //second hazard
       if (EX2_MEM1.type = ti_LOAD) {
         if ((EX2_MEM1.dReg == ID_EX1.sReg_a) || (EX2_MEM1.dReg == ID_EX1.sReg_b)) {
-          if (trace_view_on && cycle_number>=8) {
-            print_MEM2_WB(MEM2_WB, cycle_number);
-          }
+          trace(trace_view_on, cycle_number, MEM2_WB, 8);
           //move up and change ex1ex2 to no op
           MEM2_WB = MEM1_MEM2;
           MEM1_MEM2 = EX2_MEM1;
@@ -99,9 +100,7 @@ int main(int argc, char **argv)
       
       if (MEM1_MEM2.type = ti_LOAD) {
         if ((MEM1_MEM2.dReg == ID_EX1.sReg_a) || (MEM1_MEM2.dReg == ID_EX1.sReg_b)) {
-          if (trace_view_on && cycle_number>=8) {
-            print_MEM2_WB(MEM2_WB, cycle_number);
-          }
+          trace(trace_view_on, cycle_number, MEM2_WB, 8);
           //move up and change ex1ex2 to no op
           MEM2_WB = MEM1_MEM2;
           MEM1_MEM2 = EX2_MEM1;
@@ -110,6 +109,135 @@ int main(int argc, char **argv)
           cycle_number++;
         }
       }
+	  
+	  /*assuming branch condition resolved in ID stage
+	  /*if instruction is branch*/
+	  if (ID_EX1.type == ti_BRANCH) {
+		/*if the target address field is equal to PC of next instruction*/
+		
+		if(prediction_method == 1) {//apply branch prediction
+			int index = (ID_EX1.PC & 0x1F8) >> 3;//indexing with bits 9-4 for prediction_table
+			struct branch_prediction curr = prediction_table[index];//indexing with bits 9-4
+			if (ID_EX1.Addr == IF2_ID.PC && (curr.PC != ID_EX1.PC || (curr.PC == ID_EX1.PC && curr.prediction == false))) {//false prediction
+				
+				//update branch prediction table
+				struct branch_prediction b;
+				b.prediction = true;
+				b.PC = ID_EX1.PC;
+				b.target = ID_EX1.Addr;
+				prediction_table[index] = b;
+				
+				trace(trace_view_on, cycle_number, MEM2_WB, 8);
+				
+				/*flush incorrect instruction in IF2_ID and advance others
+			
+				Because of the way this program works - it doesn't actually take
+				an incorrect instruction since it's just tracing a real execution.
+				This being said: instead of 'flushing an incorrect instruction', I'm
+				simulating it by advancing the branch and all instructions before it,
+				then inserting a flushed instruction into the ID_EX1 buffer (where the
+				branch was previously) */
+				
+				MEM2_WB = MEM1_MEM2;
+				MEM1_MEM2 = EX2_MEM1;
+				EX2_MEM1 = EX1_EX2;
+				EX1_EX2 = ID_EX1;
+				ID_EX1.type = ti_FLUSHED;
+				cycle_number++;
+				
+				trace(trace_view_on, cycle_number, MEM2_WB, 8);
+				
+				MEM2_WB = MEM1_MEM2;
+				MEM1_MEM2 = EX2_MEM1;
+				EX2_MEM1 = EX1_EX2;
+				EX1_EX2 = ID_EX1;
+				ID_EX1 = IF2_ID;
+				IF2_ID.type = ti_FLUSHED;
+				cycle_number++;
+			} else if(ID_EX1.Addr != IF2_ID.PC && curr.PC != ID_EX1.PC) {//no prediction, but correct path
+			
+			//update branch prediction table
+				struct branch_prediction b;
+				b.prediction = false;
+				b.PC = ID_EX1.PC;
+				b.target = ID_EX1.PC + 4;
+				prediction_table[index] = b;
+			} else if(ID_EX1.Addr != IF2_ID.PC && (curr.PC == ID_EX1.PC && curr.prediction == true)){//false prediction
+				//update branch prediction table
+				struct branch_prediction b;
+				b.prediction = false;
+				b.PC = ID_EX1.PC;
+				b.target = ID_EX1.PC + 4;
+				prediction_table[index] = b;
+				
+				trace(trace_view_on, cycle_number, MEM2_WB, 8);
+				
+				/*flush incorrect instruction in IF2_ID and advance others
+			
+				Because of the way this program works - it doesn't actually take
+				an incorrect instruction since it's just tracing a real execution.
+				This being said: instead of 'flushing an incorrect instruction', I'm
+				simulating it by advancing the branch and all instructions before it,
+				then inserting a flushed instruction into the ID_EX1 buffer (where the
+				branch was previously) */
+				MEM2_WB = MEM1_MEM2;
+				MEM1_MEM2 = EX2_MEM1;
+				EX2_MEM1 = EX1_EX2;
+				EX1_EX2 = ID_EX1;
+				ID_EX1.type = ti_FLUSHED;
+				cycle_number++;
+				
+				trace(trace_view_on, cycle_number, MEM2_WB, 8);
+				
+				MEM2_WB = MEM1_MEM2;
+				MEM1_MEM2 = EX2_MEM1;
+				EX2_MEM1 = EX1_EX2;
+				EX1_EX2 = ID_EX1;
+				ID_EX1 = IF2_ID;
+				IF2_ID.type = ti_FLUSHED;
+				cycle_number++;
+				
+			} //do not have to update branch table for other cases because the prediction is already correct
+		} else {//no branch predictions
+			if (ID_EX1.Addr == IF2_ID.PC) {//branch taken
+				trace(trace_view_on, cycle_number, MEM2_WB, 8);
+					
+				/*flush incorrect instruction in IF2_ID and advance others
+				
+				Because of the way this program works - it doesn't actually take
+				an incorrect instruction since it's just tracing a real execution.
+				This being said: instead of 'flushing an incorrect instruction', I'm
+				simulating it by advancing the branch and all instructions before it,
+				then inserting a flushed instruction into the ID_EX1 buffer (where the
+				branch was previously) */
+				MEM2_WB = MEM1_MEM2;
+				MEM1_MEM2 = EX2_MEM1;
+				EX2_MEM1 = EX1_EX2;
+				EX1_EX2 = ID_EX1;
+				ID_EX1.type = ti_FLUSHED;
+				cycle_number++;
+				
+				trace(trace_view_on, cycle_number, MEM2_WB, 8);
+				
+				MEM2_WB = MEM1_MEM2;
+				MEM1_MEM2 = EX2_MEM1;
+				EX2_MEM1 = EX1_EX2;
+				EX1_EX2 = ID_EX1;
+				ID_EX1 = IF2_ID;
+				IF2_ID.type = ti_FLUSHED;
+				cycle_number++;
+			}
+		}
+	  }
+	  
+	  if(ID_EX1.type == ti_JTYPE) {//add jump instruction to prediction_table
+			int index = (ID_EX1.PC & 0x1F8) >> 3;
+			struct branch_prediction b;
+			b.PC = ID_EX1.PC;
+			b.target = ID_EX1.Addr;
+			prediction_table[index] = b;
+	  }
+	  
       
       if(!size){    /* if no more instructions in trace, reduce flush_counter */
         flush_counter--;   
@@ -122,47 +250,7 @@ int main(int argc, char **argv)
     }  
 
 
-    if (trace_view_on && cycle_number>=8) {/* print the instruction exiting the pipeline if trace_view_on=1 */
-      switch(MEM2_WB.type) {
-        case ti_NOP:
-          printf("[cycle %d] NOP:\n",cycle_number) ;
-          break;
-        case ti_FLUSHED:
-          printf("[cycle %d] FLUSHED:\n", cycle_number) ;
-          break;
-        case ti_RTYPE: /* registers are translated for printing by subtracting offset  */
-          printf("[cycle %d] RTYPE:",cycle_number) ;
-		  printf(" (PC: %d)(sReg_a: %d)(sReg_b: %d)(dReg: %d) \n", MEM2_WB.PC, MEM2_WB.sReg_a, MEM2_WB.sReg_b, MEM2_WB.dReg);
-          break;
-        case ti_ITYPE:
-          printf("[cycle %d] ITYPE:",cycle_number) ;
-		  printf(" (PC: %d)(sReg_a: %d)(dReg: %d)(addr: %d)\n", MEM2_WB.PC, MEM2_WB.sReg_a, MEM2_WB.dReg, MEM2_WB.Addr);
-          break;
-        case ti_LOAD:
-          printf("[cycle %d] LOAD:",cycle_number) ;      
-		  printf(" (PC: %d)(sReg_a: %d)(dReg: %d)(addr: %d)\n", MEM2_WB.PC, MEM2_WB.sReg_a, MEM2_WB.dReg, MEM2_WB.Addr);
-          break;
-        case ti_STORE:
-          printf("[cycle %d] STORE:",cycle_number) ;      
-		  printf(" (PC: %d)(sReg_a: %d)(sReg_b: %d)(addr: %d)\n", MEM2_WB.PC, MEM2_WB.sReg_a, MEM2_WB.sReg_b, MEM2_WB.Addr);
-          break;
-        case ti_BRANCH:
-          printf("[cycle %d] BRANCH:",cycle_number) ;
-		  printf(" (PC: %d)(sReg_a: %d)(sReg_b: %d)(addr: %d)\n", MEM2_WB.PC, MEM2_WB.sReg_a, MEM2_WB.sReg_b, MEM2_WB.Addr);
-          break;
-        case ti_JTYPE:
-          printf("[cycle %d] JTYPE:",cycle_number) ;
-		  printf(" (PC: %d)(addr: %d)\n", MEM2_WB.PC, MEM2_WB.Addr);
-          break;
-        case ti_SPECIAL:
-          printf("[cycle %d] SPECIAL:\n",cycle_number) ;      	
-          break;
-        case ti_JRTYPE:
-          printf("[cycle %d] JRTYPE:",cycle_number) ;
-		  printf(" (PC: %d) (sReg_a: %d)(addr: %d)\n", MEM2_WB.PC, MEM2_WB.dReg, MEM2_WB.Addr);
-          break;
-      }
-    }
+    trace(trace_view_on, cycle_number, MEM2_WB, 8);
   }
 
   trace_uninit();  
@@ -170,49 +258,4 @@ int main(int argc, char **argv)
   exit(0);
 }
 
-  /*When doing data hazards, I have to print an extra time
-    so im making this function instead of copy-pasting the print stuff twice lol
-    if you guys think of a better way lmk
-  */
-void print_MEM2_WB(struct instruction MEM2_WB, int cycle_number) {
-  switch(MEM2_WB.type) {
-      case ti_NOP:
-        printf("[cycle %d] NOP:\n",cycle_number) ;
-        break;
-      case ti_FLUSHED:
-        printf("[cycle %d] FLUSHED:\n", cycle_number) ;
-        break;
-      case ti_RTYPE: /* registers are translated for printing by subtracting offset  */
-        printf("[cycle %d] RTYPE:",cycle_number) ;
-    printf(" (PC: %d)(sReg_a: %d)(sReg_b: %d)(dReg: %d) \n", MEM2_WB.PC, MEM2_WB.sReg_a, MEM2_WB.sReg_b, MEM2_WB.dReg);
-        break;
-      case ti_ITYPE:
-        printf("[cycle %d] ITYPE:",cycle_number) ;
-    printf(" (PC: %d)(sReg_a: %d)(dReg: %d)(addr: %d)\n", MEM2_WB.PC, MEM2_WB.sReg_a, MEM2_WB.dReg, MEM2_WB.Addr);
-        break;
-      case ti_LOAD:
-        printf("[cycle %d] LOAD:",cycle_number) ;      
-    printf(" (PC: %d)(sReg_a: %d)(dReg: %d)(addr: %d)\n", MEM2_WB.PC, MEM2_WB.sReg_a, MEM2_WB.dReg, MEM2_WB.Addr);
-        break;
-      case ti_STORE:
-        printf("[cycle %d] STORE:",cycle_number) ;      
-    printf(" (PC: %d)(sReg_a: %d)(sReg_b: %d)(addr: %d)\n", MEM2_WB.PC, MEM2_WB.sReg_a, MEM2_WB.sReg_b, MEM2_WB.Addr);
-        break;
-      case ti_BRANCH:
-        printf("[cycle %d] BRANCH:",cycle_number) ;
-    printf(" (PC: %d)(sReg_a: %d)(sReg_b: %d)(addr: %d)\n", MEM2_WB.PC, MEM2_WB.sReg_a, MEM2_WB.sReg_b, MEM2_WB.Addr);
-        break;
-      case ti_JTYPE:
-        printf("[cycle %d] JTYPE:",cycle_number) ;
-    printf(" (PC: %d)(addr: %d)\n", MEM2_WB.PC, MEM2_WB.Addr);
-        break;
-      case ti_SPECIAL:
-        printf("[cycle %d] SPECIAL:\n",cycle_number) ;      	
-        break;
-      case ti_JRTYPE:
-        printf("[cycle %d] JRTYPE:",cycle_number) ;
-    printf(" (PC: %d) (sReg_a: %d)(addr: %d)\n", MEM2_WB.PC, MEM2_WB.dReg, MEM2_WB.Addr);
-        break;
-        
-    }
-}
+ 
