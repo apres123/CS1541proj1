@@ -165,19 +165,20 @@ int main(int argc, char **argv)
           printf(" (PC: %d) (sReg_a: %d)(addr: %d)\n", MEM_WB.PC, MEM_WB.dReg, MEM_WB.Addr);
               break;
           }
-			/*flush incorrect instruction in IF_ID and advance others
-			
-			  Because of the way this program works - it doesn't actually take
-			  an incorrect instruction since it's just tracing a real execution.
-			  This being said: instead of 'flushing an incorrect instruction', I'm
-			  simulating it by advancing the branch and all instructions before it,
-			  then inserting a flushed instruction into the ID_EX buffer (where the
-			  branch was previously) */
-			MEM_WB = EX_MEM;
-			EX_MEM = ID_EX;
-			ID_EX.type = ti_FLUSHED;
-			cycle_number++;
 			}
+			
+		/*flush incorrect instruction in IF_ID and advance others
+		
+		  Because of the way this program works - it doesn't actually take
+		  an incorrect instruction since it's just tracing a real execution.
+		  This being said: instead of 'flushing an incorrect instruction', I'm
+		  simulating it by advancing the branch and all instructions before it,
+		  then inserting a flushed instruction into the ID_EX buffer (where the
+		  branch was previously) */
+		MEM_WB = EX_MEM;
+		EX_MEM = ID_EX;
+		ID_EX.type = ti_FLUSHED;
+		cycle_number++;
 		}
 	  }
 
