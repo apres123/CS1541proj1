@@ -1,3 +1,59 @@
+<<<<<<< HEAD
+Sample 1
+	Size 32
+		Simulation terminates at cycle : 1081
+	Size 64
+		Simulation terminates at cycle : 1081
+	Size 128
+		Simulation terminates at cycle : 1081
+Sample 2
+	Size 32
+		Simulation terminates at cycle : 1145276
+	Size 64
+		Simulation terminates at cycle : 1140907
+		Improvement: 4369
+	Size 128
+		Simulation terminates at cycle : 1138972
+		Improvement: 1935
+Sample 3
+	Size 32
+		Simulation terminates at cycle : 1283147
+	Size 64
+		Simulation terminates at cycle : 1268969
+		Improvement: 14178
+	Size 128
+		Simulation terminates at cycle : 1264178 
+		Improvement: 4791
+Sample 4
+	Size 32
+		Simulation terminates at cycle : 3589406
+	Size 64
+		Simulation terminates at cycle : 3538348
+		Improvement: 51058
+	Size 128
+		Simulation terminates at cycle : 3530615
+		Improvement: 7733
+Large Sample 1
+	Size 32
+		Simulation terminates at cycle : 105402700
+	Size 64
+		Simulation terminates at cycle : 103703599
+		Improvement: 1699101
+	Size 128
+		Simulation terminates at cycle : 103703513
+		Improvement: 86
+Large Sample 2
+	Size 32
+		Simulation terminates at cycle : 116974556
+	Size 64
+		Simulation terminates at cycle : 115530363
+		Improvement: 1444193
+	Size 128
+		Simulation terminates at cycle : 115116953
+		Improvement: 413410
+		
+		
+=======
 Sample 1
 	Size 32
 		Simulation terminates at cycle : 1081
@@ -48,4 +104,5 @@ Large Sample 2
 		Simulation terminates at cycle : 115116953
 		
 		
+>>>>>>> 628ebae367aee980671e6afbe59d48e1abb8c3da
 		
