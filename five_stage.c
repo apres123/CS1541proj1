@@ -201,7 +201,7 @@ int main(int argc, char **argv)
 }
 
 int get_index(int PC) {
-	return (PC & 0x3F) >> 4;
+	return (PC & 0x3F0) >> 4;
 }
 
 

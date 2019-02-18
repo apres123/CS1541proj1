@@ -149,7 +149,7 @@ int main(int argc, char **argv)
 		/*if the target address field is equal to PC of next instruction*/
 		
 		if(prediction_method == 1) {//apply branch prediction
-			int index = (ID_EX1.PC & 0x3F) >> 4;//indexing with bits 9-4 for prediction_table
+			int index = (ID_EX1.PC & 0x3F0) >> 4;//indexing with bits 9-4 for prediction_table
 			struct branch_prediction curr = prediction_table[index];//indexing with bits 9-4
 			if (ID_EX1.Addr == IF2_ID.PC && (curr.PC != ID_EX1.PC || (curr.PC == ID_EX1.PC && curr.prediction == false))) {//false prediction
 				
@@ -264,7 +264,7 @@ int main(int argc, char **argv)
 	  }
 	  
 	  if(ID_EX1.type == ti_JTYPE) {//add jump instruction to prediction_table
-			int index = (ID_EX1.PC & 0x3F) >> 4;
+			int index = (ID_EX1.PC & 0x3F0) >> 4;
 			struct branch_prediction b;
 			b.PC = ID_EX1.PC;
 			b.target = ID_EX1.Addr;
