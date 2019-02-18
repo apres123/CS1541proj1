@@ -12,6 +12,8 @@
 #include <arpa/inet.h>
 #include "CPU.h" 
 
+int get_index(int PC);
+
 int main(int argc, char **argv)
 {
   struct instruction *tr_entry;
@@ -199,7 +201,7 @@ int main(int argc, char **argv)
 }
 
 int get_index(int PC) {
-	return (PC & 0x1F8) >> 3
+	return (PC & 0x3F) >> 4;
 }
 
 
