@@ -1,10 +1,12 @@
 Sample 1
 	Size 32
-		Simulation terminates at cycle : 1081
+		Simulation terminates at cycle : 1160991
 	Size 64
-		Simulation terminates at cycle : 1081
+		Simulation terminates at cycle : 1128480
+		Improvement: 32511, 2.8003%
 	Size 128
-		Simulation terminates at cycle : 1081
+		Simulation terminates at cycle : 1127473
+		Improvement: 1007, .0892%
 Sample 2
 	Size 32
 		Simulation terminates at cycle : 1145276
@@ -51,5 +53,5 @@ Large Sample 2
 		Simulation terminates at cycle : 115116953
 		Improvement: 413410, .3578%
 
-Size 64 Average % decrease: .9524%
-Size 128 Average % decrease: .1873%
+Size 64 Average % decrease: 1.4191%
+Size 128 Average % decrease: .2021%
