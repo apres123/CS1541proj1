@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 Sample 1
 	Size 32
 		Simulation terminates at cycle : 1081
@@ -11,98 +10,46 @@ Sample 2
 		Simulation terminates at cycle : 1145276
 	Size 64
 		Simulation terminates at cycle : 1140907
-		Improvement: 4369
+		Improvement: 4369, .3405%
 	Size 128
 		Simulation terminates at cycle : 1138972
-		Improvement: 1935
+		Improvement: 1935, .1696%
 Sample 3
 	Size 32
 		Simulation terminates at cycle : 1283147
 	Size 64
 		Simulation terminates at cycle : 1268969
-		Improvement: 14178
+		Improvement: 14178, 1.1049%
 	Size 128
 		Simulation terminates at cycle : 1264178 
-		Improvement: 4791
+		Improvement: 4791, .3776%
 Sample 4
 	Size 32
 		Simulation terminates at cycle : 3589406
 	Size 64
 		Simulation terminates at cycle : 3538348
-		Improvement: 51058
+		Improvement: 51058, 1.4225%
 	Size 128
 		Simulation terminates at cycle : 3530615
-		Improvement: 7733
+		Improvement: 7733, .2185%
 Large Sample 1
 	Size 32
 		Simulation terminates at cycle : 105402700
 	Size 64
 		Simulation terminates at cycle : 103703599
-		Improvement: 1699101
+		Improvement: 1699101, 1.6120%
 	Size 128
 		Simulation terminates at cycle : 103703513
-		Improvement: 86
+		Improvement: 86, 0.0000%
 Large Sample 2
 	Size 32
 		Simulation terminates at cycle : 116974556
 	Size 64
 		Simulation terminates at cycle : 115530363
-		Improvement: 1444193
+		Improvement: 1444193, 1.2346%
 	Size 128
 		Simulation terminates at cycle : 115116953
-		Improvement: 413410
-		
-		
-=======
-Sample 1
-	Size 32
-		Simulation terminates at cycle : 1081
-	Size 64
-		Simulation terminates at cycle : 1081
-	Size 128
-		Simulation terminates at cycle : 1081
-Sample 2
-	Size 32
-		Simulation terminates at cycle : 1145276
-	Size 64
-		Simulation terminates at cycle : 1140907
-		Improvement: 
-	Size 128
-		Simulation terminates at cycle : 1138972
-		Improvement: 
-Sample 3
-	Size 32
-		Simulation terminates at cycle : 1283147
-	Size 64
-		Simulation terminates at cycle : 1268969
-		Improvement: 
-	Size 128
-		Simulation terminates at cycle : 1264178 
-		Improvement: 
-Sample 4
-	Size 32
-		Simulation terminates at cycle : 3589406
-	Size 64
-		Simulation terminates at cycle : 3538348
-		Improvement: 
-	Size 128
-		Simulation terminates at cycle : 3530615
-		Improvement: 
-Large Sample 1
-	Size 32
-		Simulation terminates at cycle : 105402700
-	Size 64
-		Simulation terminates at cycle : 103703599
-	Size 128
-		Simulation terminates at cycle : 103703513
-Large Sample 2
-	Size 32
-		Simulation terminates at cycle : 116974556
-	Size 64
-		Simulation terminates at cycle : 115530363
-	Size 128
-		Simulation terminates at cycle : 115116953
-		
-		
->>>>>>> 628ebae367aee980671e6afbe59d48e1abb8c3da
-		
+		Improvement: 413410, .3578%
+
+Size 64 Average % decrease: .9524%
+Size 128 Average % decrease: .1873%
