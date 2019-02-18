@@ -2,18 +2,24 @@ From the results of the trace files, we see that the eight stage pipeline uses a
 
 
 Eight stage/five stage
-sample.tr
-2.76 (prediction_method = 0)
-2.77 (prediction_method = 1)
+sample1.tr
+2.85 (prediction_method = 0)
+3.10 (prediction_method = 1)
 sample2.tr
 2.70
-2.71
+2.73
 sample3.tr
-2.63
-2.66
+2.64
+2.65
 sample4.tr
 2.73
 2.82
+sample_large1.tr
+2.95
+3.04
+sample_large2.tr
+2.69
+2.73
 
 Since we are assuming the clock frequency of the eight-stage pipeline is double that of the five-stage pipeline, the efficiency of both programs can be calculated as followed:
 
