@@ -32,7 +32,7 @@ int main(int argc, char **argv)
   }
     
   trace_file_name = argv[1];
-  if (argc >= 3) trace_view_on = atoi(argv[2]) ;
+  if (argc == 3) trace_view_on = atoi(argv[2]) ;
   
   if (argc == 4) {
 	  prediction_method = atoi(argv[2]);
@@ -94,7 +94,7 @@ int main(int argc, char **argv)
 		/*if the target address field is equal to PC of next instruction*/
 		
 		if(prediction_method == 1) {//apply branch prediction
-			int index = (ID_EX.PC & 0x1F8) >> 3;//indexing with bits 9-4 for prediction_table
+			int index = get_index(ID_EX.PC );//indexing with bits 9-4 for prediction_table
 			struct branch_prediction curr = prediction_table[index];//indexing with bits 9-4
 			if (ID_EX.Addr == IF_ID.PC && (curr.PC != ID_EX.PC || (curr.PC == ID_EX.PC && curr.prediction == false))) {//false prediction
 				
@@ -172,7 +172,7 @@ int main(int argc, char **argv)
 	  }
 	  
 	  if(ID_EX.type == ti_JTYPE) {//add jump instruction to prediction_table
-			int index = (ID_EX.PC & 0x1F8) >> 3;
+			int index = get_index(ID_EX.PC);
 			struct branch_prediction b;
 			b.PC = ID_EX.PC;
 			b.target = ID_EX.Addr;
@@ -196,6 +196,10 @@ int main(int argc, char **argv)
   trace_uninit();
 
   exit(0);
+}
+
+int get_index(int PC) {
+	return (PC & 0x1F8) >> 3
 }
 
 
